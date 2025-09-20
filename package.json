@@ -1,0 +1,29 @@
+{
+  "name": "swagger-mcp-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/main.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "node .",
+    "dev": "tsx src/main.ts"
+  },
+  "keywords": [],
+  "author": "Christian Villablanca",
+  "license": "ISC",
+  "dependencies": {
+    "@modelcontextprotocol/inspector": "^0.16.8",
+    "@modelcontextprotocol/sdk": "^1.18.1",
+    "node-fetch": "^3.3.2",
+    "patch-package": "^8.0.0",
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  }
+}

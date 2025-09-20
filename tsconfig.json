@@ -11,8 +11,9 @@
     "resolveJsonModule": true,
     "declaration": true,
     "sourceMap": true,
-    "types": ["node"] // make sure Node types are available
+    "types": ["node"]
   },
+
   "include": ["./**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

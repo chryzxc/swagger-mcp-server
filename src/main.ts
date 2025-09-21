@@ -5,16 +5,22 @@ import {
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { loadSwagger } from "./services/swaggerLoader.js";
 import { registerFindEndpointsTool } from "./tools/findEndpoints.js";
-import { registerFindEndpointsRelatedToEntityTool } from "./tools/findEndpointsRelatedToEntity.js";
-import { registerFindSchemaTool } from "./tools/findSchema.js";
 import { registerFindEndpointsByKeywordTool } from "./tools/findEndpointsByKeyword.js";
+import { registerFindEndpointsParamsSchemaTool } from "./tools/findEndpointsParamsSchema.js";
+import { registerFindEndpointsRelatedToEntityTool } from "./tools/findEndpointsRelatedToEntity.js";
 import { registerFindEndpointsResponseSchemaTool } from "./tools/findEndpointsResponseSchema.js";
+import { registerFindSchemaTool } from "./tools/findSchema.js";
+import { registerFindEndpointsBodySchemaTool } from "./tools/findEndpointsBodySchema.js";
+import { registerListEndpointsTool } from "./tools/listEndpoints.js";
 
 const server = new McpServer({
   name: "swagger-agent",
   version: "1.0.0",
 });
 
+registerListEndpointsTool(server);
+registerFindEndpointsBodySchemaTool(server);
+registerFindEndpointsParamsSchemaTool(server);
 registerFindEndpointsResponseSchemaTool(server);
 registerFindEndpointsByKeywordTool(server);
 registerFindEndpointsTool(server);

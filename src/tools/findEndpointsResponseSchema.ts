@@ -29,13 +29,15 @@ export function registerFindEndpointsResponseSchemaTool(server: McpServer) {
               if (typeof responseDetails === "object") {
                 responseType = {
                   ...responseType,
-                  content: undefined,
+
                   [status]: {
                     ...responseDetails,
+
                     schema: getSchema(
                       spec,
                       getDTOFromContent((responseDetails as any)?.content)
                     ),
+                    content: undefined,
                   },
                 };
               }
@@ -67,9 +69,9 @@ export function registerFindEndpointsResponseSchemaTool(server: McpServer) {
           (e) =>
             `${e.method} ${e.path}\nSummary: ${e.summary}\nDescription: ${
               e.description
-            } \n${JSON.stringify(e.responseType)}`
+            } \nSchema: \n${JSON.stringify(e.responseType)}`
         )
-        .join("\n\n");
+        .join("\n\n\n");
 
       return {
         content: [{ type: "text", text: formatted }],

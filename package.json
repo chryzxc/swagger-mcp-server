@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
+    "build": "npx tsc --build --force",
+    "inspector": "npx @modelcontextprotocol/inspector node dist/src/main.js",
     "start": "node .",
     "dev": "tsx src/main.ts"
   },

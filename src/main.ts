@@ -8,12 +8,14 @@ import { registerFindEndpointsTool } from "./tools/findEndpoints.js";
 import { registerFindEndpointsRelatedToEntityTool } from "./tools/findEndpointsRelatedToEntity.js";
 import { registerFindSchemaTool } from "./tools/findSchema.js";
 import { registerFindEndpointsByKeywordTool } from "./tools/findEndpointsByKeyword.js";
+import { registerFindEndpointsResponseSchemaTool } from "./tools/findEndpointsResponseSchema.js";
 
 const server = new McpServer({
   name: "swagger-agent",
   version: "1.0.0",
 });
 
+registerFindEndpointsResponseSchemaTool(server);
 registerFindEndpointsByKeywordTool(server);
 registerFindEndpointsTool(server);
 registerFindEndpointsRelatedToEntityTool(server);

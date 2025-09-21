@@ -17,7 +17,7 @@ export const getSchema = (spec: any, dto: string) => {
                 ...values,
                 ...(requiredFields.includes(field) ? { required: true } : {}),
                 ...((values as any)?.["$ref"]
-                  ? getSchema(spec, cleanRef((values as any)["$ref"]))
+                  ? getSchema(spec, getDTOFromRef((values as any)["$ref"]))
                   : {}),
               }
             : values,
@@ -29,5 +29,11 @@ export const getSchema = (spec: any, dto: string) => {
   return "";
 };
 
-export const cleanRef = (refValue: string) =>
-  refValue.replace("#/components/schemas/", "");
+export const getDTOFromContent = (content: any) =>
+  content?.["application/json"]?.schema?.$ref?.replace(
+    "#/components/schemas/",
+    ""
+  );
+
+export const getDTOFromRef = (refValue: string) =>
+  refValue?.replace("#/components/schemas/", "");

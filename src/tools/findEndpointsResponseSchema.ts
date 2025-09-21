@@ -1,13 +1,14 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { loadSwagger } from "../services/swaggerLoader.js";
 import z from "zod";
+import { getDTOFromContent, getSchema } from "../util.js";
 
-export function registerFindEndpointsByKeywordTool(server: McpServer) {
+export function registerFindEndpointsResponseSchemaTool(server: McpServer) {
   server.registerTool(
-    "findEndpointsByKeyword",
+    "findEndpointsResponseSchema",
     {
-      title: "Find Endpoint by Keyword",
-      description: "Search Swagger spec for an endpoint related to a keyword",
+      title: "Find Endpoint Response Schema",
+      description: "Search Swagger spec for an endpoint response schema",
       inputSchema: { keyword: z.string() },
     },
     async ({ keyword }) => {
@@ -20,11 +21,31 @@ export function registerFindEndpointsByKeywordTool(server: McpServer) {
             (details as any).description || ""
           }`.toLowerCase();
           if (haystack.includes(keyword.toLowerCase())) {
+            let responseType = {};
+
+            for (const [status, responseDetails] of Object.entries(
+              (details as any).responses
+            )) {
+              if (typeof responseDetails === "object") {
+                responseType = {
+                  ...responseType,
+                  content: undefined,
+                  [status]: {
+                    ...responseDetails,
+                    schema: getSchema(
+                      spec,
+                      getDTOFromContent((responseDetails as any)?.content)
+                    ),
+                  },
+                };
+              }
+            }
             matches.push({
               method: method.toUpperCase(),
               path,
               summary: (details as any).summary || "",
               description: (details as any).description || "",
+              responseType,
             });
           }
         }
@@ -44,7 +65,9 @@ export function registerFindEndpointsByKeywordTool(server: McpServer) {
       const formatted = matches
         .map(
           (e) =>
-            `${e.method} ${e.path}\nSummary: ${e.summary}\nDescription: ${e.description}`
+            `${e.method} ${e.path}\nSummary: ${e.summary}\nDescription: ${
+              e.description
+            } \n${JSON.stringify(e.responseType)}`
         )
         .join("\n\n");
 

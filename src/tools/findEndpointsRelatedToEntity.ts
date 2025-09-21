@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { loadSwagger } from "../services/swaggerLoader.js";
 import z from "zod";
+import { getDTOFromContent, getDTOFromRef, getSchema } from "../util.js";
 
 export function registerFindEndpointsRelatedToEntityTool(server: McpServer) {
   server.registerTool(
@@ -18,6 +19,10 @@ export function registerFindEndpointsRelatedToEntityTool(server: McpServer) {
 
       for (const [path, methods] of Object.entries(spec.paths)) {
         for (const [method, details] of Object.entries(methods as any)) {
+          const requestBodySchema = getSchema(
+            spec,
+            getDTOFromContent((details as any)?.requestBody?.content)
+          );
           const combined = [
             path,
             JSON.stringify((details as any).parameters || []),
@@ -25,6 +30,7 @@ export function registerFindEndpointsRelatedToEntityTool(server: McpServer) {
             (details as any).description || "",
             JSON.stringify((details as any).requestBody || {}),
             JSON.stringify((details as any).responses || {}),
+            JSON.stringify(requestBodySchema),
           ]
             .join(" ")
             .toLowerCase();

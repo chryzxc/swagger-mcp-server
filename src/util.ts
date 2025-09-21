@@ -1,8 +1,8 @@
-export const getSchema = (spec: any, dto: string) => {
+export const getSchema = (spec: any, dto: string): Record<any, any> => {
   const schema = spec.components.schemas[dto];
 
   if (!schema) {
-    return null;
+    return {};
   }
   const requiredFields: string[] = schema?.required || [];
 
@@ -34,7 +34,7 @@ export const getSchema = (spec: any, dto: string) => {
 
     return formattedSchema;
   }
-  return "";
+  return {};
 };
 
 export const getDTOFromContent = (content: any) =>

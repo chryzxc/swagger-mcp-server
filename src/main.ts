@@ -12,12 +12,18 @@ import { registerFindEndpointsResponseSchemaTool } from "./tools/findEndpointsRe
 import { registerFindSchemaTool } from "./tools/findSchema.js";
 import { registerFindEndpointsBodySchemaTool } from "./tools/findEndpointsBodySchema.js";
 import { registerListEndpointsTool } from "./tools/listEndpoints.js";
+import { registerFindEndpointsByParametersTool } from "./tools/findEndpointsByParameters.js";
+import { registerFindEndpointsByBodyFieldsTool } from "./tools/findEndpointsByBodyFields.js";
+import { registerFindEndpointsByTagTool } from "./tools/findEndpointsByTag.js";
 
 const server = new McpServer({
   name: "swagger-agent",
   version: "1.0.0",
 });
 
+registerFindEndpointsByTagTool(server);
+registerFindEndpointsByBodyFieldsTool(server);
+registerFindEndpointsByParametersTool(server);
 registerListEndpointsTool(server);
 registerFindEndpointsBodySchemaTool(server);
 registerFindEndpointsParamsSchemaTool(server);

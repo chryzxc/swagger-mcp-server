@@ -1,48 +1,40 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import z from "zod";
-import { loadSwagger } from "../services/swaggerLoader.js";
-import {
-  getDTOFromContent,
-  getSchema,
-  removeDynamicParamsInPath,
-} from "../util.js";
 import { METHODS_WITH_BODY } from "../constants/index.js";
+import { loadSwagger } from "../services/swaggerLoader.js";
 import { TMethods } from "../types/index.js";
+import { getDTOFromContent, getSchema } from "../util.js";
 
-export function registerFindEndpointsBodySchemaTool(server: McpServer) {
+export function registerFindEndpointsByBodyFieldsTool(server: McpServer) {
   server.registerTool(
-    "findEndpointsBodySchema",
+    "findEndpointsByBodyFields",
     {
-      title: "Find Endpoint Body Schema",
-      description: "Search Swagger spec for an endpoint body schema",
-      inputSchema: { keyword: z.string() },
+      title: "Find Endpoint By Body Fields",
+      description:
+        "Search Swagger spec for an endpoint that requires a specific fields in body payload (e.g. userId, amount, propertyId)",
+      inputSchema: { fields: z.array(z.string()) },
     },
-    async ({ keyword }) => {
+    async ({ fields }) => {
       const spec = await loadSwagger();
       const matches = [];
 
       for (const [path, methods] of Object.entries(spec.paths)) {
         for (const [method, details] of Object.entries(methods as any)) {
           if (METHODS_WITH_BODY.includes(method.toLowerCase() as TMethods)) {
-            const haystack = `${removeDynamicParamsInPath(path)} ${
-              (details as any).summary || ""
-            } ${(details as any).description || ""}`.toLowerCase();
-            if (haystack.includes(keyword.toLowerCase())) {
-              const bodyType = {
-                ...((details as any)?.requestBody || {}),
-                schema: getSchema(
-                  spec,
-                  getDTOFromContent((details as any)?.requestBody?.content)
-                ),
-                content: undefined,
-              };
-
+            const schema = getSchema(
+              spec,
+              getDTOFromContent((details as any)?.requestBody?.content)
+            );
+            const hasField = Object.keys(schema).some((schemaField) =>
+              fields.includes(schemaField)
+            );
+            if (hasField) {
               matches.push({
                 method,
                 path,
                 summary: (details as any).summary || "",
                 description: (details as any).description || "",
-                bodyType,
+                schema,
               });
             }
           }
@@ -54,7 +46,7 @@ export function registerFindEndpointsBodySchemaTool(server: McpServer) {
           content: [
             {
               type: "text",
-              text: `No endpoints found for keyword "${keyword}".`,
+              text: `No endpoints found for fields (${fields.join(",")}).`,
             },
           ],
         };
@@ -65,7 +57,7 @@ export function registerFindEndpointsBodySchemaTool(server: McpServer) {
           (e) =>
             `${e.method} ${e.path}\nSummary: ${e.summary}\nDescription: ${
               e.description
-            } \nSchema: \n${JSON.stringify(e.bodyType)}`
+            } \nSchema: \n${JSON.stringify(e.schema)}`
         )
         .join("\n\n\n");
 

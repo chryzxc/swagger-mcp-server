@@ -18,5 +18,5 @@ export async function loadSwagger() {
     );
   }
 
-  return res.json();
+  return await res.json();
 }

@@ -3,7 +3,13 @@ const SWAGGER_URL =
 const BASIC_AUTH_USER = process.env.SWAGGER_USER || "";
 const BASIC_AUTH_PASS = process.env.SWAGGER_PASS || "";
 
+let swaggerSpec: any = null;
+
 export async function loadSwagger() {
+  if (swaggerSpec) {
+    return swaggerSpec;
+  }
+
   const authHeader =
     "Basic " +
     Buffer.from(`${BASIC_AUTH_USER}:${BASIC_AUTH_PASS}`).toString("base64");
@@ -18,5 +24,7 @@ export async function loadSwagger() {
     );
   }
 
-  return await res.json();
+  swaggerSpec = await res.json();
+
+  return swaggerSpec;
 }

@@ -3,6 +3,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { loadSwagger } from "../services/swaggerLoader.js";
 import { getSchema } from "../util.js";
 import { TMethods } from "../types/index.js";
+import { OpenAPIV3 } from "openapi-types";
 
 export function registerFindSchemaTool(server: McpServer) {
   server.registerTool(
@@ -14,7 +15,7 @@ export function registerFindSchemaTool(server: McpServer) {
       inputSchema: { keyword: z.string() },
     },
     async ({ keyword }) => {
-      const spec = (await loadSwagger()) as any;
+      const spec = await loadSwagger();
       const schema: {
         path: string;
         response: any;
@@ -22,20 +23,25 @@ export function registerFindSchemaTool(server: McpServer) {
         method: TMethods;
       }[] = [];
 
-      for (const [path, methods] of Object.entries<any>(spec.paths || {})) {
+      for (const [path, methods] of Object.entries(spec.paths || {})) {
         if (path.includes(keyword)) {
-          for (const [method, operation] of Object.entries<any>(methods)) {
+          for (const [
+            method,
+            operation,
+          ] of Object.entries<OpenAPIV3.OperationObject>(methods)) {
+            const requestBody = (operation.requestBody ||
+              {}) as OpenAPIV3.RequestBodyObject;
             schema.push({
               path,
               response: null,
-              method: method as any,
+              method: method as TMethods,
               body: {
-                ...operation?.requestBody,
+                ...requestBody,
                 content: {
                   "application/json": {
                     schema: getSchema(
                       spec,
-                      operation.requestBody?.content?.[
+                      (requestBody?.content as any)?.[
                         "application/json"
                       ]?.schema?.["$ref"].replace("#/components/schemas/", "")
                     ),

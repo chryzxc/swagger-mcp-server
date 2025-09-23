@@ -1,3 +1,5 @@
+import { OpenAPIV3 } from "openapi-types";
+
 export const getSchema = (spec: any, dto: string): Record<any, any> => {
   const schema = spec.components.schemas[dto];
 
@@ -6,7 +8,7 @@ export const getSchema = (spec: any, dto: string): Record<any, any> => {
   }
   const requiredFields: string[] = schema?.required || [];
 
-  const mapObject = (objValue: Record<any, any> = {}) => {
+  const mapObject = (objValue: OpenAPIV3.SchemaObject = {}) => {
     let obj = {};
     for (const [field, values] of Object.entries(objValue)) {
       obj = {
@@ -16,8 +18,8 @@ export const getSchema = (spec: any, dto: string): Record<any, any> => {
             ? {
                 ...(requiredFields.includes(field) ? { required: true } : {}),
                 ...mapObject(values || {}),
-                ...((values as any)?.["$ref"]
-                  ? getSchema(spec, getDTOFromRef((values as any)?.["$ref"]))
+                ...(values?.["$ref"]
+                  ? getSchema(spec, getDTOFromRef(values?.["$ref"]))
                   : {}),
               }
             : values,

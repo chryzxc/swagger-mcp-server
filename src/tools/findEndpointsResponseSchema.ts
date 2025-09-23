@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { loadSwagger } from "../services/swaggerLoader.js";
 import z from "zod";
 import { getDTOFromContent, getSchema } from "../util.js";
+import { OpenAPIV3 } from "openapi-types";
 
 export function registerFindEndpointsResponseSchemaTool(server: McpServer) {
   server.registerTool(
@@ -15,27 +16,29 @@ export function registerFindEndpointsResponseSchemaTool(server: McpServer) {
       const spec = await loadSwagger();
       const matches = [];
 
-      for (const [path, methods] of Object.entries(spec.paths)) {
-        for (const [method, details] of Object.entries(methods as any)) {
-          const haystack = `${path} ${(details as any).summary || ""} ${
-            (details as any).description || ""
+      for (const [path, methods] of Object.entries(spec.paths || {})) {
+        for (const [
+          method,
+          details,
+        ] of Object.entries<OpenAPIV3.OperationObject>(methods)) {
+          const haystack = `${path} ${details.summary || ""} ${
+            details.description || ""
           }`.toLowerCase();
           if (haystack.includes(keyword.toLowerCase())) {
             let responseType = {};
 
             for (const [status, responseDetails] of Object.entries(
-              (details as any).responses
+              details.responses
             )) {
               if (typeof responseDetails === "object") {
+                const responseObj = responseDetails as OpenAPIV3.ResponseObject;
                 responseType = {
                   ...responseType,
-
                   [status]: {
                     ...responseDetails,
-
                     schema: getSchema(
                       spec,
-                      getDTOFromContent((responseDetails as any)?.content)
+                      getDTOFromContent(responseObj.content)
                     ),
                     content: undefined,
                   },
@@ -45,8 +48,8 @@ export function registerFindEndpointsResponseSchemaTool(server: McpServer) {
             matches.push({
               method: method.toUpperCase(),
               path,
-              summary: (details as any).summary || "",
-              description: (details as any).description || "",
+              summary: details.summary || "",
+              description: details.description || "",
               responseType,
             });
           }

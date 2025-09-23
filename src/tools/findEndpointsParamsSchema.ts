@@ -2,6 +2,15 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import z from "zod";
 import { loadSwagger } from "../services/swaggerLoader.js";
 import { removeDynamicParamsInPath } from "../util.js";
+import { OpenAPIV3 } from "openapi-types";
+
+interface IMatchedData {
+  method: string;
+  path: string;
+  summary: string;
+  description: string;
+  paramsType: (OpenAPIV3.ReferenceObject | OpenAPIV3.ParameterObject)[];
+}
 
 export function registerFindEndpointsParamsSchemaTool(server: McpServer) {
   server.registerTool(
@@ -13,21 +22,25 @@ export function registerFindEndpointsParamsSchemaTool(server: McpServer) {
     },
     async ({ keyword }) => {
       const spec = await loadSwagger();
-      const matches = [];
+      const matches: IMatchedData[] = [];
 
-      for (const [path, methods] of Object.entries(spec.paths)) {
-        for (const [method, details] of Object.entries(methods as any)) {
+      for (const [path, methods] of Object.entries(spec.paths || {})) {
+        for (const [
+          method,
+          details,
+        ] of Object.entries<OpenAPIV3.OperationObject>(methods)) {
           if (method.toLowerCase() === "get") {
             const haystack = `${removeDynamicParamsInPath(path)} ${
-              (details as any).summary || ""
-            } ${(details as any).description || ""}`.toLowerCase();
+              details.summary || ""
+            } ${details.description || ""}`.toLowerCase();
+
             if (haystack.includes(keyword.toLowerCase())) {
               matches.push({
                 method,
                 path,
-                summary: (details as any).summary || "",
-                description: (details as any).description || "",
-                paramsType: (details as any)?.parameters,
+                summary: details.summary || "",
+                description: details.description || "",
+                paramsType: details?.parameters || [],
               });
             }
           }

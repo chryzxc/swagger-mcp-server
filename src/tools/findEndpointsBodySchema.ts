@@ -8,6 +8,7 @@ import {
 } from "../util.js";
 import { METHODS_WITH_BODY } from "../constants/index.js";
 import { TMethods } from "../types/index.js";
+import { OpenAPI, OpenAPIV3 } from "openapi-types";
 
 export function registerFindEndpointsBodySchemaTool(server: McpServer) {
   server.registerTool(
@@ -21,18 +22,24 @@ export function registerFindEndpointsBodySchemaTool(server: McpServer) {
       const spec = await loadSwagger();
       const matches = [];
 
-      for (const [path, methods] of Object.entries(spec.paths)) {
-        for (const [method, details] of Object.entries(methods as any)) {
+      for (const [path, methods] of Object.entries(spec.paths || {})) {
+        for (const [
+          method,
+          operation,
+        ] of Object.entries<OpenAPIV3.OperationObject>(methods)) {
           if (METHODS_WITH_BODY.includes(method.toLowerCase() as TMethods)) {
+            const requestBodyObj =
+              operation.requestBody as OpenAPIV3.RequestBodyObject;
             const haystack = `${removeDynamicParamsInPath(path)} ${
-              (details as any).summary || ""
-            } ${(details as any).description || ""}`.toLowerCase();
+              operation.summary || ""
+            } ${operation.description || ""}`.toLowerCase();
+
             if (haystack.includes(keyword.toLowerCase())) {
               const bodyType = {
-                ...((details as any)?.requestBody || {}),
+                ...(operation?.requestBody || {}),
                 schema: getSchema(
                   spec,
-                  getDTOFromContent((details as any)?.requestBody?.content)
+                  getDTOFromContent(requestBodyObj?.content)
                 ),
                 content: undefined,
               };
@@ -40,8 +47,8 @@ export function registerFindEndpointsBodySchemaTool(server: McpServer) {
               matches.push({
                 method,
                 path,
-                summary: (details as any).summary || "",
-                description: (details as any).description || "",
+                summary: operation.summary || "",
+                description: operation.description || "",
                 bodyType,
               });
             }

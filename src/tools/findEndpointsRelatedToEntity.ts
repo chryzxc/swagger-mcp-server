@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { loadSwagger } from "../services/swaggerLoader.js";
 import z from "zod";
 import { getDTOFromContent, getDTOFromRef, getSchema } from "../util.js";
+import { OpenAPIV3 } from "openapi-types";
 
 export function registerFindEndpointsRelatedToEntityTool(server: McpServer) {
   server.registerTool(
@@ -17,19 +18,25 @@ export function registerFindEndpointsRelatedToEntityTool(server: McpServer) {
 
       const matches = [];
 
-      for (const [path, methods] of Object.entries(spec.paths)) {
-        for (const [method, details] of Object.entries(methods as any)) {
+      for (const [path, methods] of Object.entries(spec.paths || {})) {
+        for (const [
+          method,
+          details,
+        ] of Object.entries<OpenAPIV3.OperationObject>(methods)) {
+          const requestBodyObj =
+            details.requestBody as OpenAPIV3.RequestBodyObject;
           const requestBodySchema = getSchema(
             spec,
-            getDTOFromContent((details as any)?.requestBody?.content)
+            getDTOFromContent(requestBodyObj.content)
           );
+
           const combined = [
             path,
-            JSON.stringify((details as any).parameters || []),
-            (details as any).summary || "",
-            (details as any).description || "",
-            JSON.stringify((details as any).requestBody || {}),
-            JSON.stringify((details as any).responses || {}),
+            JSON.stringify(details.parameters || []),
+            details.summary || "",
+            details.description || "",
+            JSON.stringify(details.requestBody || {}),
+            JSON.stringify(details.responses || {}),
             JSON.stringify(requestBodySchema),
           ]
             .join(" ")
@@ -39,8 +46,8 @@ export function registerFindEndpointsRelatedToEntityTool(server: McpServer) {
             matches.push({
               method: method.toUpperCase(),
               path,
-              summary: (details as any).summary || "",
-              description: (details as any).description || "",
+              summary: details.summary || "",
+              description: details.description || "",
             });
           }
         }

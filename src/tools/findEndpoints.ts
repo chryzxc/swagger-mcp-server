@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { loadSwagger } from "../services/swaggerLoader.js";
 import z from "zod";
+import { OpenAPI } from "openapi-types";
 
 export function registerFindEndpointsTool(server: McpServer) {
   server.registerTool(
@@ -12,11 +13,13 @@ export function registerFindEndpointsTool(server: McpServer) {
       inputSchema: { keyword: z.string() },
     },
     async ({ keyword }) => {
-      const spec = (await loadSwagger()) as any;
+      const spec = await loadSwagger();
       const endpoints: string[] = [];
 
-      for (const [path, methods] of Object.entries<any>(spec.paths || {})) {
-        for (const [method, operation] of Object.entries<any>(methods)) {
+      for (const [path, methods] of Object.entries(spec.paths || {})) {
+        for (const [method, operation] of Object.entries<OpenAPI.Operation>(
+          methods
+        )) {
           if (
             path.includes(keyword) ||
             operation?.summary?.includes(keyword) ||

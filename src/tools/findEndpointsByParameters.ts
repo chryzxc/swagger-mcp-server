@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import z from "zod";
 import { loadSwagger } from "../services/swaggerLoader.js";
+import { OpenAPIV3 } from "openapi-types";
 
 export function registerFindEndpointsByParametersTool(server: McpServer) {
   server.registerTool(
@@ -15,20 +16,23 @@ export function registerFindEndpointsByParametersTool(server: McpServer) {
       const spec = await loadSwagger();
       const matches = [];
 
-      for (const [path, methods] of Object.entries(spec.paths)) {
-        for (const [method, details] of Object.entries(methods as any)) {
+      for (const [path, methods] of Object.entries(spec.paths || {})) {
+        for (const [
+          method,
+          details,
+        ] of Object.entries<OpenAPIV3.OperationObject>(methods)) {
           if (
             method.toLowerCase() === "get" &&
-            (details as any).parameters?.some((paramObj: any) =>
+            details.parameters?.some((paramObj: any) =>
               params.includes(paramObj.name)
             )
           ) {
             matches.push({
               method,
               path,
-              summary: (details as any).summary || "",
-              description: (details as any).description || "",
-              paramsType: (details as any)?.parameters,
+              summary: details.summary || "",
+              description: details.description || "",
+              paramsType: details?.parameters,
             });
           }
         }

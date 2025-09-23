@@ -2,8 +2,8 @@ import { OpenAPI } from "openapi-types";
 
 const SWAGGER_URL =
   process.env.SWAGGER_URL || "http://localhost:3333/api-docs-json";
-const BASIC_AUTH_USER = process.env.SWAGGER_USER || "";
-const BASIC_AUTH_PASS = process.env.SWAGGER_PASS || "";
+const BASIC_AUTH_USER = process.env.SWAGGER_BASIC_AUTH_USER || "";
+const BASIC_AUTH_PASS = process.env.SWAGGER_BASIC_AUTH_PASS || "";
 
 let swaggerSpec: any = null;
 

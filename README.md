@@ -74,8 +74,8 @@ Add the Swagger MCP server to your MCP client configuration.
       "command": "node",
       "args": ["E:/Projects/swagger-mcp-server/dist/main.js"],
       "env": {
-        "BASIC_AUTH_USER": "",
-        "BASIC_AUTH_PASS": "",
+        "SWAGGER_BASIC_AUTH_USER": "",
+        "SWAGGER_BASIC_AUTH_PASS": "",
         "SWAGGER_URL": "http://localhost:3333/api-docs-json"
       },
       "type": "stdio"

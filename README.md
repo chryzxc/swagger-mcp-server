@@ -46,6 +46,16 @@ You can run the MCP server directly using **tsx** or build first.
 npx tsx /src/main.ts
 ```
 
+### Add `config.json` in root directory
+
+```bash
+{
+  "SWAGGER_URL": "https://some-domain/api-docs-json",
+  "SWAGGER_BASIC_AUTH_USER": "",
+  "SWAGGER_BASIC_AUTH_PASS": ""
+}
+```
+
 ### Build and run
 
 ```bash

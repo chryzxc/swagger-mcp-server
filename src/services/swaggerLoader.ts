@@ -1,9 +1,14 @@
 import { OpenAPI } from "openapi-types";
+import fs from "fs";
 
-const SWAGGER_URL =
-  process.env.SWAGGER_URL || "http://localhost:3333/api-docs-json";
-const BASIC_AUTH_USER = process.env.SWAGGER_BASIC_AUTH_USER || "";
-const BASIC_AUTH_PASS = process.env.SWAGGER_BASIC_AUTH_PASS || "";
+function loadConfig() {
+  const config = JSON.parse(fs.readFileSync("./config.json", "utf-8"));
+  return {
+    SWAGGER_URL: config.SWAGGER_URL || "http://localhost:3333/api-docs-json",
+    BASIC_AUTH_USER: config.SWAGGER_BASIC_AUTH_USER || "",
+    BASIC_AUTH_PASS: config.SWAGGER_BASIC_AUTH_PASS || "",
+  };
+}
 
 let swaggerSpec: any = null;
 
@@ -11,6 +16,8 @@ export async function loadSwagger(): Promise<OpenAPI.Document> {
   if (swaggerSpec) {
     return swaggerSpec;
   }
+
+  const { BASIC_AUTH_PASS, BASIC_AUTH_USER, SWAGGER_URL } = loadConfig();
 
   const authHeader =
     "Basic " +

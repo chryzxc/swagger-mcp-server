@@ -40,7 +40,7 @@ export const getSchema = (spec: any, dto: string): Record<any, any> => {
 };
 
 export const getDTOFromContent = (content: any) =>
-  content?.["application/json"]?.schema?.$ref?.replace(
+  content?.["application/json"]?.schema?.["$ref"]?.replace(
     "#/components/schemas/",
     ""
   );

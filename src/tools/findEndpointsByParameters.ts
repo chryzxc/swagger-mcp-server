@@ -23,9 +23,10 @@ export function registerFindEndpointsByParametersTool(server: McpServer) {
         ] of Object.entries<OpenAPIV3.OperationObject>(methods)) {
           if (
             method.toLowerCase() === "get" &&
-            details.parameters?.some((paramObj: any) =>
+            (details.parameters?.some((paramObj: any) =>
               params.includes(paramObj.name)
-            )
+            ) ||
+              params.some((param) => details.description?.includes(param)))
           ) {
             matches.push({
               method,
